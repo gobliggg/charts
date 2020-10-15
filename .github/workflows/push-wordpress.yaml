@@ -1,0 +1,26 @@
+name: Push Wordpress
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - wordpress/**
+
+jobs:
+  push:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checking out repository
+        uses: actions/checkout@v2
+
+      - name: Install Helm push plugin
+        run: |-
+          helm plugin install https://github.com/chartmuseum/helm-push.git
+      - name: Push chart package to ChartMuseum
+        env:
+          CHARTMUSEUM_USER: ${{ secrets.CHARTMUSEUM_USER }}
+          CHARTMUSEUM_PASS: ${{ secrets.CHARTMUSEUM_PASS }}
+          CHARTMUSEUM_HOST: ${{ secrets.CHARTMUSEUM_HOST }}
+        run: |-
+          helm push wordpress/ https://"$CHARTMUSEUM_USER":"$CHARTMUSEUM_PASS"@"$CHARTMUSEUM_HOST"
